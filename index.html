@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Toilet Paper Dashboard</title>
+  <style>
+    :root{
+      --bg: #0b0f14;
+      --card: #121a24;
+      --text: #f2f6ff;
+      --muted: #a7b3c7;
+      --ok: #2dd4bf;
+      --warn: #fbbf24;
+      --bad: #fb7185;
+      --border: rgba(255,255,255,.12);
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    *{ box-sizing: border-box; }
+    body{
+      margin:0;
+      background: radial-gradient(1200px 600px at 50% -10%, rgba(45,212,191,.12), transparent 60%),
+                  radial-gradient(900px 500px at 100% 20%, rgba(251,191,36,.10), transparent 55%),
+                  var(--bg);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 32px 40px 12px;
+      gap: 20px;
+    }
+    h1{
+      margin:0;
+      font-size: 44px;
+      letter-spacing: .3px;
+      line-height: 1.1;
+    }
+    .sub{
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 18px;
+    }
+    .btn{
+      appearance:none;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      padding: 14px 18px;
+      font-size: 18px;
+      border-radius: 14px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: transform .05s ease, background .15s ease;
+      white-space: nowrap;
+    }
+    .btn:hover{ background: rgba(255,255,255,.10); }
+    .btn:active{ transform: translateY(1px); }
+
+    main{
+      padding: 22px 40px 44px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 26px;
+      margin-top: 22px;
+    }
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 26px;
+      box-shadow: var(--shadow);
+      min-height: 320px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+    .label{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    .label h2{
+      margin:0;
+      font-size: 36px;
+      letter-spacing: .2px;
+    }
+    .status-pill{
+      font-size: 16px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--text);
+      background: rgba(255,255,255,.06);
+    }
+    .big{
+      margin: 20px 0 0;
+      font-size: 96px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+    .unit{
+      font-size: 28px;
+      color: var(--muted);
+      margin-top: 10px;
+    }
+    .bar-wrap{
+      margin-top: 18px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow:hidden;
+      height: 34px;
+    }
+    .bar{
+      height: 100%;
+      width: 0%;
+      background: var(--ok);
+      transition: width .35s ease;
+    }
+    .footer{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 10px;
+      margin-top: 22px;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    /* Dialog */
+    dialog{
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 0;
+      background: #0f1620;
+      color: var(--text);
+      box-shadow: 0 30px 90px rgba(0,0,0,.6);
+      width: min(680px, calc(100vw - 40px));
+    }
+    dialog::backdrop{
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(3px);
+    }
+    .dlg-head{
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+    .dlg-head strong{ font-size: 20px; }
+    .dlg-body{
+      padding: 18px 20px 10px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+    }
+    .field label{
+      color: var(--muted);
+      font-size: 14px;
+    }
+    input[type="number"]{
+      width: 100%;
+      padding: 14px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.05);
+      color: var(--text);
+      font-size: 18px;
+      outline: none;
+    }
+    .hint{
+      grid-column: 1 / -1;
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 6px;
+    }
+    .dlg-actions{
+      display:flex;
+      justify-content:flex-end;
+      gap: 10px;
+      padding: 14px 20px 18px;
+      border-top: 1px solid var(--border);
+    }
+    .btn.primary{
+      background: rgba(45,212,191,.14);
+      border-color: rgba(45,212,191,.35);
+    }
+    .btn.danger{
+      background: rgba(251,113,133,.14);
+      border-color: rgba(251,113,133,.35);
+    }
+
+    /* Responsive */
+    @media (max-width: 900px){
+      .grid{ grid-template-columns: 1fr; }
+      .big{ font-size: 82px; }
+      header{ flex-direction:column; align-items:flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Toilet Paper Dashboard</h1>
+      <div class="sub">Projector-friendly view · press <b>F11</b> for fullscreen</div>
+    </div>
+    <button class="btn" id="openUpdate">Update amounts</button>
+  </header>
+
+  <main>
+    <section class="grid">
+      <div class="card" id="cardMen">
+        <div class="label">
+          <h2>Men’s bathroom</h2>
+          <span class="status-pill" id="statusMen">—</span>
+        </div>
+
+        <div>
+          <div class="big"><span id="valMen">1</span><span style="font-size:.45em;">×</span></div>
+          <div class="unit">rolls remaining</div>
+
+          <div class="bar-wrap" aria-label="Men's supply level">
+            <div class="bar" id="barMen"></div>
+          </div>
+        </div>
+
+        <div class="footer">
+          <span>Last updated: <span id="updatedMen">—</span></span>
+          <span>Scale: 0–5 rolls</span>
+        </div>
+      </div>
+
+      <div class="card" id="cardWomen">
+        <div class="label">
+          <h2>Women’s bathroom</h2>
+          <span class="status-pill" id="statusWomen">—</span>
+        </div>
+
+        <div>
+          <div class="big"><span id="valWomen">0.5</span><span style="font-size:.45em;">×</span></div>
+          <div class="unit">rolls remaining</div>
+
+          <div class="bar-wrap" aria-label="Women's supply level">
+            <div class="bar" id="barWomen"></div>
+          </div>
+        </div>
+
+        <div class="footer">
+          <span>Last updated: <span id="updatedWomen">—</span></span>
+          <span>Scale: 0–5 rolls</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="dlg">
+    <form method="dialog" id="formUpdate">
+      <div class="dlg-head">
+        <strong>Update toilet paper amounts</strong>
+        <button class="btn" value="cancel" aria-label="Close">Close</button>
+      </div>
+
+      <div class="dlg-body">
+        <div class="field">
+          <label for="inMen">Men’s bathroom (rolls)</label>
+          <input id="inMen" name="men" type="number" step="0.25" min="0" max="20" />
+        </div>
+
+        <div class="field">
+          <label for="inWomen">Women’s bathroom (rolls)</label>
+          <input id="inWomen" name="women" type="number" step="0.25" min="0" max="20" />
+        </div>
+
+        <div class="hint">
+          Tips: use <b>0.5</b> for half a roll. Values are saved locally in this browser.
+        </div>
+      </div>
+
+      <div class="dlg-actions">
+        <button class="btn danger" type="button" id="resetBtn">Reset to current</button>
+        <button class="btn" value="cancel">Cancel</button>
+        <button class="btn primary" value="save" id="saveBtn">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+    // Projector-friendly scale: 0..5 rolls fills the bar (you can change this)
+    const MAX_FOR_BAR = 5;
+
+    const els = {
+      menVal: document.getElementById('valMen'),
+      womenVal: document.getElementById('valWomen'),
+      menBar: document.getElementById('barMen'),
+      womenBar: document.getElementById('barWomen'),
+      menStatus: document.getElementById('statusMen'),
+      womenStatus: document.getElementById('statusWomen'),
+      menUpdated: document.getElementById('updatedMen'),
+      womenUpdated: document.getElementById('updatedWomen'),
+
+      openBtn: document.getElementById('openUpdate'),
+      dlg: document.getElementById('dlg'),
+      inMen: document.getElementById('inMen'),
+      inWomen: document.getElementById('inWomen'),
+      saveBtn: document.getElementById('saveBtn'),
+      resetBtn: document.getElementById('resetBtn')
+    };
+
+    function nowStamp() {
+      const d = new Date();
+      return d.toLocaleString(undefined, {
+        year: 'numeric', month: 'short', day: '2-digit',
+        hour: '2-digit', minute: '2-digit'
+      });
+    }
+
+    function statusFor(v){
+      if (v <= 0) return { label: "OUT", color: "var(--bad)" };
+      if (v < 0.75) return { label: "LOW", color: "var(--bad)" };
+      if (v < 1.5) return { label: "OK", color: "var(--warn)" };
+      return { label: "GOOD", color: "var(--ok)" };
+    }
+
+    function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+
+    function setBar(barEl, v){
+      const pct = clamp((v / MAX_FOR_BAR) * 100, 0, 100);
+      barEl.style.width = pct + "%";
+      barEl.style.background = statusFor(v).color;
+    }
+
+    function setStatus(pillEl, v){
+      const s = statusFor(v);
+      pillEl.textContent = s.label;
+      pillEl.style.borderColor = "rgba(255,255,255,.18)";
+      pillEl.style.background = "rgba(255,255,255,.06)";
+      pillEl.style.color = "var(--text)";
+      // add subtle colored glow
+      pillEl.style.boxShadow = `0 0 0 2px rgba(255,255,255,.02), 0 0 18px ${s.color}33`;
+    }
+
+    function loadState(){
+      // Defaults from your message:
+      const defaults = {
+        men: 1,
+        women: 0.5,
+        updatedMen: nowStamp(),
+        updatedWomen: nowStamp()
+      };
+
+      try{
+        const raw = localStorage.getItem("tpDashboard");
+        if(!raw) return defaults;
+        const parsed = JSON.parse(raw);
+        return { ...defaults, ...parsed };
+      }catch{
+        return defaults;
+      }
+    }
+
+    function saveState(state){
+      localStorage.setItem("tpDashboard", JSON.stringify(state));
+    }
+
+    let state = loadState();
+
+    function render(){
+      els.menVal.textContent = state.men;
+      els.womenVal.textContent = state.women;
+
+      setBar(els.menBar, Number(state.men));
+      setBar(els.womenBar, Number(state.women));
+
+      setStatus(els.menStatus, Number(state.men));
+      setStatus(els.womenStatus, Number(state.women));
+
+      els.menUpdated.textContent = state.updatedMen || "—";
+      els.womenUpdated.textContent = state.updatedWomen || "—";
+    }
+
+    function openDialog(){
+      // Pre-fill inputs with current values
+      els.inMen.value = state.men;
+      els.inWomen.value = state.women;
+      els.dlg.showModal();
+      els.inMen.focus();
+      els.inMen.select();
+    }
+
+    els.openBtn.addEventListener("click", openDialog);
+
+    // Reset inputs to current state (not defaults)
+    els.resetBtn.addEventListener("click", () => {
+      els.inMen.value = state.men;
+      els.inWomen.value = state.women;
+    });
+
+    // Handle Save button via dialog close value
+    els.dlg.addEventListener("close", () => {
+      if (els.dlg.returnValue !== "save") return;
+
+      const men = Number(els.inMen.value);
+      const women = Number(els.inWomen.value);
+
+      // Basic validation: treat NaN as 0
+      state.men = Number.isFinite(men) ? men : 0;
+      state.women = Number.isFinite(women) ? women : 0;
+
+      state.updatedMen = nowStamp();
+      state.updatedWomen = nowStamp();
+
+      saveState(state);
+      render();
+    });
+
+    // Initial render
+    render();
+  </script>
+</body>
+</html>
